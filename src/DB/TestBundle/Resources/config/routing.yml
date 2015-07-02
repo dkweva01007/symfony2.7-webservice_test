@@ -1,0 +1,13 @@
+d_bporte_test_users:
+    path:     /getall
+    defaults: { _controller: DBTestBundle:Test:getall }
+
+d_bporte_test_new_user:
+    path:     /adduser
+    defaults: { _controller: DBTestBundle:Test:adduser }
+
+d_bporte_view_put_user:
+    path:     /put{id}
+    defaults: { _controller: DBTestBundle:Test:putuser }
+
+

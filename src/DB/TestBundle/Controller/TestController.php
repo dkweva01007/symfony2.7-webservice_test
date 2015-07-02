@@ -2,19 +2,17 @@
 
 // src/OC/PlatformBundle/Controller/DbController.php
 
-namespace DB\porteBundle\Controller;
+namespace DB\TestBundle\Controller;
 
-use DB\porteBundle\Entity\account;
-use DB\porteBundle\Entity\Account_historic;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DomCrawler\Crawler;
 
-class DBaseController extends Controller {
+class TestController extends Controller {
 
     public function logservice(&$ch) {
-        curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/login');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/login');
         curl_setopt($ch, CURLOPT_COOKIESESSION, true);
         curl_setopt($ch, CURLOPT_COOKIEJAR, '/tmp/cookie.txt');
         curl_setopt($ch, CURLOPT_COOKIEFILE, '/tmp/cookie.txt');
@@ -23,7 +21,7 @@ class DBaseController extends Controller {
         //$doc = new Crawler($response);
         //$doc = $doc->filterXPath('descendant-or-self::hidden/p');
        // dump($doc);
-        curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/login_check');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/login_check');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, true);
         $params = array(
@@ -40,16 +38,15 @@ class DBaseController extends Controller {
         $ch = curl_init();
         $users = null;
         $this->logservice($ch);
-        curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/service/accounts.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
-        dump($response);
         $users = json_decode($response, true);
         curl_close($ch);  
         //dump($users);
         //decript JSON
-        return $this->render('DBporteBundle:Consult:test.html.twig', array(
+        return $this->render('DBTestBundle:Consult:test.html.twig', array(
                     'entities' => $users['entities']));
     }
 
@@ -58,6 +55,7 @@ class DBaseController extends Controller {
         //test création user
         $info = NULL;
         $ch = curl_init();
+        $this->logservice($ch);
         $user = array();
         $formBuilder = $this->createFormBuilder();
         $formBuilder
@@ -70,7 +68,7 @@ class DBaseController extends Controller {
         $user = json_encode($user);
         //verification que l'envoie est correcté et effectué
         if ($form->isValid() && $form->isSubmitted()) {
-            curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/service/accounts');
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -84,12 +82,12 @@ class DBaseController extends Controller {
             //decript JSON
             $info = json_decode($response);
 
-            return $this->render('DBporteBundle:Consult:test2.html.twig', array(
+            return $this->render('DBTestBundle:Consult:test2.html.twig', array(
                         'form' => $form->createView(),
                         'info' => $user,
             ));
         }
-        return $this->render('DBporteBundle:Consult:test2.html.twig', array(
+        return $this->render('DBTestBundle:Consult:test2.html.twig', array(
                     'form' => $form->createView(),
                     'info' => $info,
         ));
@@ -99,18 +97,21 @@ class DBaseController extends Controller {
     public function putuserAction(Request $request, $id) {
 
         $ch = curl_init();
+        $this->logservice($ch);
         //recupération info du compte
-        curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/service/accounts/' . $id . '.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts/' . $id . '.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $user = json_decode($response, true);
+        dump($user);
         //récupération des historique du compte
-        curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/service/accounthistoric_by_users/' . $id . '.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounthistoric_by_users/' . $id . '.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $historic = json_decode($response, true);
+        dump($historic);
         $formBuilder = $this->createFormBuilder();
         $formBuilder
                 ->add('amount', 'money', array('currency' => 'EUR', 'precision' => 2))
@@ -124,7 +125,7 @@ class DBaseController extends Controller {
         if ($form->isValid() && $form->isSubmitted()) {
             $custom = $form->getData();
             $custom = json_encode($custom);
-            curl_setopt($ch, CURLOPT_URL, 'http://localhost/test4/web/app_dev.php/service/accounts/' . $id . '.json');
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts/' . $id . '.json');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -135,7 +136,7 @@ class DBaseController extends Controller {
         if (!isset($historic['entity'])) {
             $historic['entity'] = NULL;
         }
-        return $this->render('DBporteBundle:Consult:test3.html.twig', array(
+        return $this->render('DBTestBundle:Consult:test3.html.twig', array(
                     'user' => $user['entity']['mail'],
                     'solde' => $user['entity']['amount'],
                     'limit_date' => $user['entity']['limit_date'],

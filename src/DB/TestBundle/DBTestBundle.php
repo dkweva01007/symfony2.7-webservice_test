@@ -1,9 +1,9 @@
 <?php
 
-namespace DB\porteBundle;
+namespace DB\TestBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class DBporteBundle extends Bundle
+class DBTestBundle extends Bundle
 {
 }

@@ -1,7 +1,3 @@
-d_bporte:
-    resource: "@DBporteBundle/Resources/config/routing.yml"
-    prefix:   /platform
-
-app:
-    resource: "@AppBundle/Controller/"
-    type:     annotation
+TestService:
+    resource: "@DBTestBundle/Resources/config/routing.yml"
+    prefix:   /
