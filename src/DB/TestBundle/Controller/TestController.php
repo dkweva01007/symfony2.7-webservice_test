@@ -18,6 +18,7 @@ class TestController extends Controller {
         curl_setopt($ch, CURLOPT_COOKIEFILE, '/tmp/cookie.txt');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
+        //pour token
         //$doc = new Crawler($response);
         //$doc = $doc->filterXPath('descendant-or-self::hidden/p');
        // dump($doc);
@@ -44,7 +45,6 @@ class TestController extends Controller {
         $response = curl_exec($ch);
         $users = json_decode($response, true);
         curl_close($ch);  
-        //dump($users);
         //decript JSON
         return $this->render('DBTestBundle:Consult:test.html.twig', array(
                     'entities' => $users['entities']));
@@ -104,18 +104,17 @@ class TestController extends Controller {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $user = json_decode($response, true);
-        dump($user);
         //récupération des historique du compte
         curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounthistoric_by_users/' . $id . '.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $historic = json_decode($response, true);
-        dump($historic);
         $formBuilder = $this->createFormBuilder();
         $formBuilder
                 ->add('amount', 'money', array('currency' => 'EUR', 'precision' => 2))
-                ->add('limitDate', 'datetime')
+                ->add('limitDate', 'datetime',array('data' => new \DateTime('now')))
+                ->add('website_id', 'hidden', array('data' => $this->container->getParameter('website_id')))
                 ->add('Envoyer', 'submit');
 
         $form = $formBuilder->getForm();
@@ -131,7 +130,6 @@ class TestController extends Controller {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $custom);
             $response = curl_exec($ch);
-            dump($response);
         }
         if (!isset($historic['entity'])) {
             $historic['entity'] = NULL;
