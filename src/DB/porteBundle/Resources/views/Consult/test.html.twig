@@ -1,0 +1,18 @@
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Page de test</title>
+    </head>
+    <body>
+        <ul>
+            {% for entity in entities %}
+                <li>id: {{ entity.id }}</li>
+                <li>mail: {{ entity.mail }}</li>
+                <li>solde: {{ entity.amount }}</li>
+                <li>expire le: {{ entity.limit_date|date('d/m/Y H:i:s') }}</li>
+                {% endfor %}
+            <ul/>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Consultation du compte {{ user }}</title>
+    </head>
+    <body>
+        <h1>Solde du compte {{ user }} :  {{ solde }}€ ! Date d'expiration : {{ limit_date|date('d/m/Y h:m:s') }}</h1>
+        <p>
+            {{ form(form) }}
+        </p>
+        <table border='1'>
+            <caption>Historique</caption>
+            <tr>
+                <th>site</th>
+                <th>Montant</th>
+                <th>Transaction</th>
+                <th>Le</th>
+            </tr>
+            {% for historic in listhistoric %}
+                <tr>
+                    <td>{{ historic.website.usename }}</td>
+                    <td>{{ historic.amount }}</td>
+                    <td>{{ historic.action_type }}</td>
+                    <td>{{ historic.date|date('d/m/Y H:i:s') }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
+ No newline at end of file

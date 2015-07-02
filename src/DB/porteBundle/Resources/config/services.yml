@@ -1,0 +1,4 @@
+services:
+#    d_bporte.example:
+#        class: DB\porteBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]
