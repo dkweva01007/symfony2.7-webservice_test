@@ -1,4 +1,4 @@
-/app/bootstrap.php.cache
+﻿/app/bootstrap.php.cache
 /app/cache/*
 !app/cache/.gitkeep
 /app/config/parameters.yml
@@ -12,4 +12,3 @@
 /nbproject/
 /composer.lock
 .~lock.Procédure Rest sur Symfony2.odt#
-/symfony2.7-webservice/nbproject/private/
