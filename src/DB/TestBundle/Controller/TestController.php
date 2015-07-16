@@ -99,13 +99,13 @@ class TestController extends Controller {
         $ch = curl_init();
         $this->logservice($ch);
         //recupération info du compte
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts/' . $id . '.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/api/v1/accounts/' . $id . '/');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $user = json_decode($response, true);
         //récupération des historique du compte
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounthistoric_by_users/' . $id . '.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/api/v1/accounthistoric_by_users/' . $user['entity']['id'] . '.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
@@ -124,7 +124,7 @@ class TestController extends Controller {
         if ($form->isValid() && $form->isSubmitted()) {
             $custom = $form->getData();
             $custom = json_encode($custom);
-            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts/' . $id . '.json');
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/api/v1/accounts/' . $id . '/');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
