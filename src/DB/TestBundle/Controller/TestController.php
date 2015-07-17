@@ -12,7 +12,7 @@ use Symfony\Component\DomCrawler\Crawler;
 class TestController extends Controller {
 
     public function logservice(&$ch) {
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/login');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/login');
         curl_setopt($ch, CURLOPT_COOKIESESSION, true);
         curl_setopt($ch, CURLOPT_COOKIEJAR, '/tmp/cookie.txt');
         curl_setopt($ch, CURLOPT_COOKIEFILE, '/tmp/cookie.txt');
@@ -21,8 +21,8 @@ class TestController extends Controller {
         //pour token
         //$doc = new Crawler($response);
         //$doc = $doc->filterXPath('descendant-or-self::hidden/p');
-       // dump($doc);
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/login_check');
+        // dump($doc);
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/login_check');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, true);
         $params = array(
@@ -39,12 +39,12 @@ class TestController extends Controller {
         $ch = curl_init();
         $users = null;
         $this->logservice($ch);
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/service/accounts.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $users = json_decode($response, true);
-        curl_close($ch);  
+        curl_close($ch);
         //decript JSON
         return $this->render('DBTestBundle:Consult:test.html.twig', array(
                     'entities' => $users['entities']));
@@ -68,12 +68,14 @@ class TestController extends Controller {
         $user = json_encode($user);
         //verification que l'envoie est correcté et effectué
         if ($form->isValid() && $form->isSubmitted()) {
-            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/service/accounts');
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $user);
+            dump($user);
             $response = curl_exec($ch);
+            dump($response);
             if (!$response) {
                 throw $this->createNotFoundException(
                         'Something wrong'
@@ -99,13 +101,18 @@ class TestController extends Controller {
         $ch = curl_init();
         $this->logservice($ch);
         //recupération info du compte
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/api/v1/accounts/' . $id . '/');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id . '/');
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //curl error SSL certificate problem, verify that the CA cert is OK
+        curl_setopt($ch, CURLOPT_COOKIESESSION, true);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, '/tmp/cookie.txt');
+        curl_setopt($ch, CURLOPT_COOKIEFILE, '/tmp/cookie.txt');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $user = json_decode($response, true);
         //récupération des historique du compte
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/api/v1/accounthistoric_by_users/' . $user['entity']['id'] . '.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounthistoric_by_users/' . $user['entity']['id'] . '.json');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
@@ -113,7 +120,7 @@ class TestController extends Controller {
         $formBuilder = $this->createFormBuilder();
         $formBuilder
                 ->add('amount', 'money', array('currency' => 'EUR', 'precision' => 2))
-                ->add('limitDate', 'datetime',array('data' => new \DateTime('now')))
+                ->add('limitDate', 'datetime', array('data' => new \DateTime('now')))
                 ->add('website_id', 'hidden', array('data' => $this->container->getParameter('website_id')))
                 ->add('Envoyer', 'submit');
 
@@ -124,10 +131,10 @@ class TestController extends Controller {
         if ($form->isValid() && $form->isSubmitted()) {
             $custom = $form->getData();
             $custom = json_encode($custom);
-            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch').'/api/v1/accounts/' . $id . '/');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id . '/');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json', 'Accept: application/json'));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $custom);
             $response = curl_exec($ch);
         }
