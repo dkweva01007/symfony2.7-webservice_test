@@ -97,7 +97,26 @@ class TestController extends Controller {
 
     //test de modification du compte uttilisateur
     public function putuserAction(Request $request, $id) {
+        $formBuilder = $this->createFormBuilder();
+        $formBuilder
+                ->add('amount', 'money', array('currency' => 'EUR', 'precision' => 2))
+                ->add('limitDate', 'datetime', array('data' => new \DateTime('now')))
+                ->add('website_id', 'hidden', array('data' => $this->container->getParameter('website_id')))
+                ->add('Envoyer', 'submit');
 
+        $form = $formBuilder->getForm();
+        $form->handleRequest($request);
+        //verification que l'envoie est correcté et effectué
+        if ($form->isValid() && $form->isSubmitted()) {
+            $custom = $form->getData();
+            $custom = json_encode($custom);
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id . '/');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json', 'Accept: application/json'));
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $custom);
+            $response = curl_exec($ch);
+        }
         $ch = curl_init();
         $this->logservice($ch);
         //recupération info du compte
@@ -117,27 +136,6 @@ class TestController extends Controller {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $historic = json_decode($response, true);
-        $formBuilder = $this->createFormBuilder();
-        $formBuilder
-                ->add('amount', 'money', array('currency' => 'EUR', 'precision' => 2))
-                ->add('limitDate', 'datetime', array('data' => new \DateTime('now')))
-                ->add('website_id', 'hidden', array('data' => $this->container->getParameter('website_id')))
-                ->add('Envoyer', 'submit');
-
-        $form = $formBuilder->getForm();
-        $form->handleRequest($request);
-
-        //verification que l'envoie est correcté et effectué
-        if ($form->isValid() && $form->isSubmitted()) {
-            $custom = $form->getData();
-            $custom = json_encode($custom);
-            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id . '/');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json', 'Accept: application/json'));
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $custom);
-            $response = curl_exec($ch);
-        }
         if (!isset($historic['entity'])) {
             $historic['entity'] = NULL;
         }
