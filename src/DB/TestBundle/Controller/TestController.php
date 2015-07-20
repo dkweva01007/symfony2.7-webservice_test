@@ -101,38 +101,41 @@ class TestController extends Controller {
         $formBuilder
                 ->add('amount', 'money', array('currency' => 'EUR', 'precision' => 2))
                 ->add('limitDate', 'datetime', array('data' => new \DateTime('now')))
+                ->add('followed_id', 'text')
                 ->add('website_id', 'hidden', array('data' => $this->container->getParameter('website_id')))
                 ->add('Envoyer', 'submit');
 
         $form = $formBuilder->getForm();
         $form->handleRequest($request);
+        $ch = curl_init();
+        $this->logservice($ch);
         //verification que l'envoie est correcté et effectué
         if ($form->isValid() && $form->isSubmitted()) {
             $custom = $form->getData();
             $custom = json_encode($custom);
-            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id . '/');
+            curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id );
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json', 'Accept: application/json'));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $custom);
             $response = curl_exec($ch);
         }
-        $ch = curl_init();
-        $this->logservice($ch);
         //recupération info du compte
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id . '/');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounts/' . $id );
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //curl error SSL certificate problem, verify that the CA cert is OK
         curl_setopt($ch, CURLOPT_COOKIESESSION, true);
         curl_setopt($ch, CURLOPT_COOKIEJAR, '/tmp/cookie.txt');
         curl_setopt($ch, CURLOPT_COOKIEFILE, '/tmp/cookie.txt');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $user = json_decode($response, true);
         //récupération des historique du compte
-        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounthistoric_by_users/' . $user['entity']['id'] . '.json');
+        curl_setopt($ch, CURLOPT_URL, $this->container->getParameter('service_patch') . '/api/v1/accounthistoric_by_users/' . $user['entity']['id'] );
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         $historic = json_decode($response, true);
